@@ -140,7 +140,7 @@ function loadOrders() {
         });
       }
       var loc = JSON.parse(localStorage.getItem("loveOrders")||"[]");
-      var localOnly = loc.filter(function(o){ return !o._ghId; });
+      /* old filter: var localOnly = loc.filter(function(o){ return !o._ghId; }); */ var localOnly = loc;
       if (localOnly.length > 0 && !hasData) { renderOrders(localOnly); hasData = true; }
       if (!hasData) { document.getElementById("empty").style.display = "block"; }
     }).catch(function(){
