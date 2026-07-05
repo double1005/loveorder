@@ -36,12 +36,24 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Ro
 .btn-secondary:active{transform:scale(.97)}
 .fade-in{animation:fadeIn .3s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-</style>
+.setup-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:999;display:none;align-items:center;justify-content:center;padding:20px}
+.setup-overlay.active{display:flex}
+.setup-modal{background:#fff;border-radius:20px;padding:28px 24px;max-width:360px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.15);text-align:center}
+.setup-icon{font-size:40px;margin-bottom:8px}
+.setup-modal h3{font-size:18px;font-weight:700;margin-bottom:6px}
+.setup-desc{font-size:13px;color:#8e8e93;margin-bottom:20px;line-height:1.5}
+.setup-field{text-align:left;margin-bottom:14px}
+.setup-field label{font-size:12px;font-weight:600;display:block;margin-bottom:4px;color:#1c1c1e}
+.setup-field input{width:100%;padding:10px 14px;border:1.5px solid #e5e0dc;border-radius:12px;font-size:14px;outline:none;box-sizing:border-box}
+.setup-field input:focus{border-color:#A2DEDE}
+.setup-actions{display:flex;gap:10px;margin-top:8px}
+.setup-actions .btn-secondary{flex:1;justify-content:center}
+.setup-actions .btn-primary{flex:1;justify-content:center}.settings-btn{font-size:16px;cursor:pointer;opacity:.5;transition:opacity .2s;display:inline-block}.settings-btn:hover{opacity:1}</style>
 </head>
 <body>
 <div id="app">
 <div class="header">
-<div style="font-size:28px;margin-bottom:4px">📬</div>
+<div style="font-size:28px;margin-bottom:4px;display:flex;align-items:center;justify-content:center;gap:8px">📬<span class="settings-btn" onclick="showSetupModal()" style="font-size:16px">⚙️</span></div>
 <h1>舟舟的收件箱</h1>
 <div class="sub">Inbox for Zhouzhou</div>
 <div class="names"><span>小九</span> 的心意</div>
@@ -60,7 +72,9 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Ro
 </div>
 <script>
 // ===== Firebase Config =====
-var GH_TOKEN=localStorage.getItem("gh_token")||"";var GH_REPO=localStorage.getItem("gh_repo")||"double1005/loveorder";
+function showSetupModal(){document.getElementById("setupOverlay").classList.add("active")}
+function saveSetup(){var t=document.getElementById("setupToken").value.trim();var r=document.getElementById("setupRepo").value.trim();if(t&&r){localStorage.setItem("gh_token",t);localStorage.setItem("gh_repo",r);localStorage.removeItem("gh_skipped");location.reload()}}
+function skipSetup(){localStorage.setItem("gh_skipped","1");document.getElementById("setupOverlay").classList.remove("active")}var GH_TOKEN=localStorage.getItem("gh_token")||"";var GH_REPO=localStorage.getItem("gh_repo")||"double1005/loveorder";
 
 // Load orders from localStorage
 function loadOrders() {

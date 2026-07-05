@@ -63,11 +63,23 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Ro
 .result-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 .btn-secondary{display:inline-flex;align-items:center;gap:4px;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:100px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer}
 .btn-secondary:active{transform:scale(.97)}
-</style>
+.setup-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.45);z-index:999;display:none;align-items:center;justify-content:center;padding:20px}
+.setup-overlay.active{display:flex}
+.setup-modal{background:#fff;border-radius:20px;padding:28px 24px;max-width:360px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.15);text-align:center}
+.setup-icon{font-size:40px;margin-bottom:8px}
+.setup-modal h3{font-size:18px;font-weight:700;margin-bottom:6px}
+.setup-desc{font-size:13px;color:#8e8e93;margin-bottom:20px;line-height:1.5}
+.setup-field{text-align:left;margin-bottom:14px}
+.setup-field label{font-size:12px;font-weight:600;display:block;margin-bottom:4px;color:#1c1c1e}
+.setup-field input{width:100%;padding:10px 14px;border:1.5px solid #e5e0dc;border-radius:12px;font-size:14px;outline:none;box-sizing:border-box}
+.setup-field input:focus{border-color:#A2DEDE}
+.setup-actions{display:flex;gap:10px;margin-top:8px}
+.setup-actions .btn-secondary{flex:1;justify-content:center}
+.setup-actions .btn-primary{flex:1;justify-content:center}.settings-btn{font-size:16px;cursor:pointer;opacity:.5;transition:opacity .2s}.settings-btn:hover{opacity:1}</style>
 </head><body><div id="app">
 <div id="page-home" class="page active">
 <div class="home-dog"><img src="outputs/img/sticker-01.png"></div>
-<div class="home-title">情绪点单</div>
+<div class="home-title" style="display:flex;align-items:center;justify-content:center;gap:10px">情绪点单<div class="settings-btn" onclick="showSetupModal()">⚙️</div></div>
 <div class="home-sub">Love in every form</div>
 <div class="home-names"><span>小九</span> → <span>舟舟</span></div>
 <button class="btn-primary" onclick="goTo('menu')">点单 ▶</button></div>
@@ -117,7 +129,9 @@ const MENU={catNames:{zh:["陪伴","关心","萌萌","惊喜","计划"],en:["Be 
 {cat:4,zh:"等你",en:"Waiting",desc:"下次见",img:22}
 ]};
 const state={selected:[],activeCat:0,orderMsg:"",orderTime:"现在"};
-var GH_TOKEN=localStorage.getItem("gh_token")||"";var GH_REPO=localStorage.getItem("gh_repo")||"double1005/loveorder";function init(){renderCats();renderItems();renderTimeOpts()}
+function showSetupModal(){document.getElementById("setupOverlay").classList.add("active")}
+function saveSetup(){var t=document.getElementById("setupToken").value.trim();var r=document.getElementById("setupRepo").value.trim();if(t&&r){localStorage.setItem("gh_token",t);localStorage.setItem("gh_repo",r);localStorage.removeItem("gh_skipped");location.reload()}}
+function skipSetup(){localStorage.setItem("gh_skipped","1");document.getElementById("setupOverlay").classList.remove("active")}var GH_TOKEN=localStorage.getItem("gh_token")||"";var GH_REPO=localStorage.getItem("gh_repo")||"double1005/loveorder";function init(){renderCats();renderItems();renderTimeOpts()}
 function renderCats(){const el=document.getElementById("catTabs");el.innerHTML="";const cats=MENU.catNames;cats.zh.forEach((name,i)=>{const btn=document.createElement("div");btn.className="cat-btn"+(i===state.activeCat?" active":"");btn.textContent=name+" "+cats.en[i];btn.onclick=()=>{state.activeCat=i;renderCats();renderItems()};el.appendChild(btn)})}
 function renderItems(){const el=document.getElementById("itemsGrid");el.innerHTML="";MENU.items.filter(it=>it.cat===state.activeCat).forEach(item=>{const idx=MENU.items.indexOf(item);const sel=state.selected.includes(idx);const card=document.createElement("div");card.className="item-card"+(sel?" selected":"");card.innerHTML="<img src=\""+ip(item.img)+"\"><div class=\"item-name\">"+item.zh+"</div><div class=\"item-desc\">"+item.desc+"</div><div class=\"item-check\">"+(sel?"✓":"")+"</div>";card.onclick=()=>{const p=state.selected.indexOf(idx);if(p>-1)state.selected.splice(p,1);else state.selected.push(idx);renderItems();updateMenuBar()};el.appendChild(card)});updateMenuBar()}
 function updateMenuBar(){document.getElementById("menuCount").innerHTML="已选 <strong>"+state.selected.length+"</strong>"}
@@ -130,14 +144,7 @@ function removeSel(idx){const p=state.selected.indexOf(idx);if(p>-1)state.select
 function submitOrder(){state.orderMsg=document.getElementById("msgInput").value.trim();const items=state.selected.map(idx=>MENU.items[idx]);const el=document.getElementById("resultList");el.innerHTML="";items.forEach(item=>{const div=document.createElement("div");div.className="rl-item";div.innerHTML="<img src=\""+ip(item.img)+"\"><span>"+item.zh+" — "+item.desc+"</span>";el.appendChild(div)});document.getElementById("resultMsg").textContent=state.orderMsg?"\""+state.orderMsg+"\"":"";document.getElementById("resultTime").textContent="🕐 "+state.orderTime;const dog=state.selected.length>0?items[items.length-1]:MENU.items[0];document.getElementById("resultDog").innerHTML="<img src=\""+ip(dog.img)+"\">";goTo("result");saveOrder(items)}function saveOrder(items){var o={items:items,msg:state.orderMsg,time:state.orderTime,date:new Date().toLocaleString()};var r=JSON.parse(localStorage.getItem("loveOrders")||"[]");r.push(o);localStorage.setItem("loveOrders",JSON.stringify(r));if(GH_TOKEN){var orderData={items:items.map(function(it){return{zh:it.zh,desc:it.desc,img:it.img,cat:it.cat}}),msg:state.orderMsg,time:state.orderTime,date:new Date().toLocaleString()};fetch("https://api.github.com/repos/"+GH_REPO+"/issues",{method:"POST",headers:{"Authorization":"token "+GH_TOKEN,"Content-Type":"application/json"},body:JSON.stringify({title:"小九的心意 "+new Date().toLocaleString(),body:JSON.stringify(orderData),labels:["loveorder"]})}).catch(function(e){console.error("GitHub sync failed:",e)})}}
 init();
 if (!GH_TOKEN && !localStorage.getItem("gh_skipped")) {
-  var t = prompt("🔑 配置 GitHub Token 即可跨网络同步订单\n(在 github.com/settings/tokens 创建，选 public_repo)\n留空跳过，仅本地使用");
-  if (t) {
-    localStorage.setItem("gh_token", t);
-    localStorage.setItem("gh_repo", prompt("GitHub 仓库名：", "double1005/loveorder") || "double1005/loveorder");
-  } else {
-    localStorage.setItem("gh_skipped", "1");
-  }
-  location.reload();
+  showSetupModal();
 }
 </script></body></html>
 
