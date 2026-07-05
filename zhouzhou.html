@@ -70,6 +70,28 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Ro
 <button class="btn-primary" onclick="clearOrders()">清空全部</button>
 </div>
 </div>
+<div id="setupOverlay" class="setup-overlay">
+  <div class="setup-modal">
+    <div class="setup-icon">🔗</div>
+    <h3>配置跨网络同步</h3>
+    <p class="setup-desc">配置 GitHub Token 后，小九和舟舟在不同地方也能收发订单</p>
+    <div class="setup-field">
+      <label>GitHub Token</label>
+      <input type="password" id="setupToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    </div>
+    <div class="setup-field">
+      <label>仓库名</label>
+      <input type="text" id="setupRepo" value="double1005/loveorder" placeholder="owner/repo">
+    </div>
+    <div class="setup-actions">
+      <button class="btn-secondary" id="testConnBtn" onclick="testConnection()">测试连接</button>
+      <button class="btn-primary" onclick="saveSetup()" style="padding:10px 28px;font-size:14px">保存并同步</button>
+      <button class="btn-secondary" onclick="skipSetup()">跳过</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
 // ===== Firebase Config =====
 function showSetupModal(){document.getElementById("setupOverlay").classList.add("active")}
@@ -169,6 +191,9 @@ function clearOrders() {
 loadOrders();
 // Auto refresh every 5 seconds
 setInterval(loadOrders, 5000);
+
+// settings button fallback - also bind via querySelector
+document.addEventListener("DOMContentLoaded",function(){var sb=document.querySelector(".settings-btn");if(sb){sb.addEventListener("click",showSetupModal)}});
 </script>
 </body>
 </html>
