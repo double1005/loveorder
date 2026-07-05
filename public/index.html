@@ -1,275 +1,304 @@
-﻿<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>情绪点单 · Love Order</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💝</text></svg>">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#faf7f5;--card:#fff;--primary:#A2DEDE;--primary-dark:#8AC8C8;--text:#1c1c1e;--text-sec:#8e8e93;--border:#e5e0dc;--shadow:0 2px 12px rgba(0,0,0,.06);--radius:16px;--radius-sm:10px;--safe-b:env(safe-area-inset-bottom,0px)}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-#app{height:100%;max-width:480px;margin:0 auto;position:relative;overflow:hidden}
-.page{display:none;height:100%;flex-direction:column;padding:0 20px;overflow-y:auto}
-.page.active{display:flex}
-
-/* ===== Home ===== */
-#page-home{align-items:center;justify-content:center;text-align:center}
-.home-dog{margin-bottom:12px}.home-dog img{width:120px;height:auto}
-.home-title{font-size:28px;font-weight:700;letter-spacing:2px}
-.home-sub{font-size:14px;color:var(--text-sec);margin:6px 0 32px}
-.home-names{font-size:15px;color:var(--text-sec);margin-bottom:24px}
-.home-names span{color:var(--primary);font-weight:600}
-.home-status{font-size:12px;color:var(--text-sec);margin-top:20px;display:flex;align-items:center;gap:4px;justify-content:center}
-.home-status .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.home-status .dot.online{background:#34c759}
-.home-status .dot.offline{background:#ff3b30}
-.btn-primary{display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:#1c1c1e;border:none;border-radius:100px;padding:14px 48px;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(162,222,222,.35);transition:transform .15s}
-.btn-primary:active{background:var(--primary-dark);transform:scale(.97)}
-
-/* ===== Menu ===== */
-.menu-header{padding:20px 0 8px;display:flex;align-items:center;justify-content:space-between}
-.menu-header h2{font-size:18px;font-weight:700}
-.menu-header span{font-size:13px;color:var(--text-sec)}
-.cats{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
-.cat-btn{flex-shrink:0;padding:6px 18px;border-radius:100px;border:1.5px solid var(--border);background:var(--card);font-size:14px;font-weight:500;cursor:pointer;color:var(--text-sec);transition:all .2s}
-.cat-btn.active{background:var(--primary);color:#1c1c1e;border-color:var(--primary);font-weight:600}
-.cat-btn:active{transform:scale(.95)}
-.items-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:100px}
-.item-card{background:var(--card);border-radius:var(--radius);padding:14px 12px 10px;border:2px solid transparent;cursor:pointer;box-shadow:var(--shadow);text-align:center;transition:all .2s}
-.item-card:active{transform:scale(.96)}
-.item-card.selected{border-color:var(--primary);background:var(--primary-dim, rgba(162,222,222,.08))}
-.item-card img{width:68px;height:auto;display:block;margin:0 auto 4px}
-.item-card .item-name{font-size:14px;font-weight:600}
-.item-card .item-desc{font-size:11px;color:var(--text-sec)}
-.item-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;margin-top:6px;transition:all .2s}
-.item-card.selected .item-check{border-color:var(--primary);background:var(--primary);color:#1c1c1e}
-
-/* ===== Menu bar ===== */
-.menu-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:440px;width:calc(100% - 40px);background:var(--card);border-radius:var(--radius) var(--radius) 0 0;box-shadow:0 -2px 16px rgba(0,0,0,.06);padding:12px 16px calc(12px + var(--safe-b));display:flex;align-items:center;justify-content:space-between;z-index:10}
-.menu-bar .count{font-size:14px;color:var(--text-sec)}
-.menu-bar .count strong{color:var(--text)}
-.menu-bar .btn-primary{padding:10px 28px;font-size:14px;box-shadow:none}
-
-/* ===== Confirm ===== */
-.confirm-header{padding:20px 0 8px}.confirm-header h2{font-size:18px;font-weight:700}
-.confirm-header .back{font-size:13px;color:var(--primary);cursor:pointer;margin-bottom:4px;display:inline-block}
-.selected-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-.selected-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:var(--radius-sm);padding:10px 12px;box-shadow:var(--shadow)}
-.selected-item img{width:40px;height:auto;flex-shrink:0}
-.selected-item .si-name{font-size:14px;font-weight:600}
-.selected-item .si-cat{font-size:11px;color:var(--text-sec)}
-.selected-item .si-remove{background:none;border:none;color:var(--text-sec);font-size:18px;cursor:pointer;margin-left:auto;padding:0 0 0 8px}
-.form-group{margin-bottom:14px}
-.form-group label{font-size:13px;font-weight:600;margin-bottom:6px;display:block;color:var(--text)}
-.form-group textarea{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;resize:none;height:60px;font-family:inherit;background:var(--card);outline:none;transition:border .2s}
-.form-group textarea:focus{border-color:var(--primary)}
-.time-options{display:flex;gap:8px;flex-wrap:wrap}
-.time-opt{padding:8px 18px;border-radius:100px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;color:var(--text-sec);transition:all .2s}
-.time-opt.active{border-color:var(--primary);background:rgba(162,222,222,.1);color:var(--primary);font-weight:600}
-.confirm-submit{margin:18px 0 40px;text-align:center}
-.confirm-submit .btn-primary{padding:14px 48px;font-size:16px}
-
-/* ===== Result ===== */
-#page-result{align-items:center;justify-content:center;text-align:center}
-.result-dog{margin-bottom:8px}.result-dog img{width:100px;height:auto}
-.result-title{font-size:22px;font-weight:700;margin-bottom:4px}
-.result-sub{font-size:13px;color:var(--text-sec);margin-bottom:12px}
-.result-list{background:var(--card);border-radius:var(--radius);padding:14px 16px;margin:0 0 16px;width:100%;box-shadow:var(--shadow);text-align:left}
-.result-list .rl-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:14px}
-.result-list .rl-item+.rl-item{border-top:1px solid var(--border)}
-.result-list .rl-item img{width:28px;height:auto;flex-shrink:0}
-.result-msg{font-size:13px;color:var(--text-sec);font-style:italic;margin:4px 0 12px;padding:0 16px}
-.result-time{font-size:13px;color:var(--text-sec);margin-bottom:24px}
-.result-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.btn-secondary{display:inline-flex;align-items:center;gap:4px;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:100px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;transition:transform .15s}
-.btn-secondary:active{transform:scale(.97)}
-
-.fade-in{animation:fadeIn .3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-</style>
-</head>
-<body>
-<div id="app">
-  <!-- Home -->
-  <div id="page-home" class="page active">
-    <div class="home-dog"><img src="outputs/img/sticker-01.png"></div>
-    <div class="home-title">情绪点单</div>
-    <div class="home-sub">Love in every form</div>
-    <div class="home-names"><span>小九</span> → <span>舟舟</span></div>
-    <button class="btn-primary" onclick="goTo('menu')">点单 ▶</button>
-    <div class="home-status">
-      <span class="dot offline" id="statusDot"></span>
-      <span id="statusText">连接中...</span>
-    </div>
-  </div>
-
-  <!-- Menu -->
-  <div id="page-menu" class="page">
-    <div class="menu-header"><h2>想要舟舟做点什么？</h2><span>Order for Zhouzhou</span></div>
-    <div class="cats" id="catTabs"></div>
-    <div class="items-grid" id="itemsGrid"></div>
-    <div class="menu-bar">
-      <span class="count" id="menuCount">已选 <strong>0</strong></span>
-      <button class="btn-primary" onclick="confirmOrder()">确认 Next</button>
-    </div>
-  </div>
-
-  <!-- Confirm -->
-  <div id="page-confirm" class="page">
-    <div class="confirm-header">
-      <div class="back" onclick="goTo('menu')">← 返回</div>
-      <h2>确认 Confirm</h2>
-    </div>
-    <div class="selected-list" id="selectedList"></div>
-    <div class="form-group">
-      <label>留句话</label>
-      <textarea id="msgInput" placeholder="Say something…" maxlength="200"></textarea>
-    </div>
-    <div class="form-group">
-      <label>什么时候？When?</label>
-      <div class="time-options" id="timeOptions">
-        <div class="time-opt" data-val="现在">现在</div>
-        <div class="time-opt" data-val="今晚">今晚</div>
-        <div class="time-opt" data-val="明早">明早</div>
-        <div class="time-opt" data-val="见面时">见面时</div>
-      </div>
-    </div>
-    <div class="confirm-submit"><button class="btn-primary" onclick="submitOrder()">下单 Place Order</button></div>
-  </div>
-
-  <!-- Result -->
-  <div id="page-result" class="page">
-    <div class="result-dog" id="resultDog"></div>
-    <div class="result-title">已下单</div>
-    <div class="result-sub">Ordered</div>
-    <div class="result-list" id="resultList"></div>
-    <div class="result-msg" id="resultMsg"></div>
-    <div class="result-time" id="resultTime"></div>
-    <div class="result-actions">
-      <button class="btn-primary" onclick="goTo('menu')" style="padding:12px 32px;font-size:15px">再来 Again</button>
-      <button class="btn-secondary" onclick="goHome()">← 首页 Home</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ===== Menu Data =====
-const imgMap={watch:2,game:3,call:4,music:5,write:6,remind:7,voice:8,tuck:9,kiss:10,selfie:11,compliment:13,sweetTalk:14,gift:15,mailLetter:16,callMe:17,birthday:18,planTrip:19,planAhead:20,wishList:21,waiting:22};
-function ip(n){var s=n.toString();if(s.length<2)s="0"+s;return "outputs/img/sticker-"+s+".png"}
-const MENU={catNames:{zh:["陪伴","关心","萌萌","惊喜","计划"],en:["Be There","Care","Sweet","Surprise","Plan"]},items:[
-{cat:0,zh:"看电影",en:"Watch Together",desc:"同时打开，边看边聊",img:2},
-{cat:0,zh:"游戏",en:"Game Night",desc:"陪我玩",img:3},
-{cat:0,zh:"连麦",en:"Call",desc:"打电话",img:4},
-{cat:0,zh:"听歌",en:"Listen Together",desc:"共享歌单",img:5},
-{cat:1,zh:"写点东西",en:"Write to Me",desc:"打一段字发过来",img:6},
-{cat:1,zh:"催我睡觉",en:"Remind Me",desc:"你知道我总熬夜",img:7},
-{cat:1,zh:"发条语音",en:"Voice Note",desc:"想听你声音",img:8},
-{cat:1,zh:"哄睡",en:"Tuck Me In",desc:"到我睡着",img:9},
-{cat:2,zh:"亲亲",en:"Kiss Me",desc:"啵啵",img:10},
-{cat:2,zh:"报备",en:"Selfie",desc:"你在做什么呢",img:11},
-{cat:2,zh:"夸夸我",en:"Compliment Me",desc:"你觉得我怎么样",img:13},
-{cat:2,zh:"说点好听的",en:"Sweet Talk",desc:"让我脸红那种",img:14},
-{cat:2,zh:"我想你",en:"Miss You",desc:"你想我吗",img:23},
-{cat:3,zh:"寄礼物",en:"Send a Gift",desc:"拆你挑的快递",img:15},
-{cat:3,zh:"寄信",en:"Mail a Letter",desc:"收你写的字",img:16},
-{cat:3,zh:"打给我",en:"Call Me",desc:"想打就打",img:17},
-{cat:3,zh:"特殊的日子",en:"Remote Birthday",desc:"我们一起",img:18},
-{cat:4,zh:"计划见面",en:"Plan the Trip",desc:"倒数的日子",img:19},
-{cat:4,zh:"聊以后",en:"Plan Ahead",desc:"幻想以后生活",img:20},
-{cat:4,zh:"列清单",en:"Wish List",desc:"见面想做的事",img:21},
-{cat:4,zh:"等你",en:"Waiting",desc:"下次见",img:22}
-]};
-
-// ===== State =====
-const state={selected:[],activeCat:0,orderMsg:"",orderTime:"现在"};
-
-// ===== GitHub Issues =====
-var GH_REPO = "double1005/loveorder";
-var GH_TOKEN = localStorage.getItem("gh_token") || "";
-
-// If no token saved, prompt user
-if (!GH_TOKEN) {
-  GH_TOKEN = prompt("请输入 GitHub Personal Access Token（需 repo 权限）：\n没有的话去 https://github.com/settings/tokens 创建一个");
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>情绪点单 · Love Order</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💝</text></svg>">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#faf7f5;--card:#fff;--primary:#A2DEDE;--primary-dark:#8AC8C8;--text:#1c1c1e;--text-sec:#8e8e93;--border:#e5e0dc;--shadow:0 2px 12px rgba(0,0,0,.06);--radius:16px;--radius-sm:10px;--safe-b:env(safe-area-inset-bottom,0px)}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+#app{height:100%;max-width:480px;margin:0 auto;position:relative;overflow:hidden}
+.page{display:none;height:100%;flex-direction:column;padding:0 20px;overflow-y:auto}
+.page.active{display:flex}
+
+/* ===== Home ===== */
+#page-home{align-items:center;justify-content:center;text-align:center}
+.home-dog{margin-bottom:12px}.home-dog img{width:120px;height:auto}
+.home-title{font-size:28px;font-weight:700;letter-spacing:2px}
+.home-sub{font-size:14px;color:var(--text-sec);margin:6px 0 32px}
+.home-names{font-size:15px;color:var(--text-sec);margin-bottom:24px}
+.home-names span{color:var(--primary);font-weight:600}
+.home-status{font-size:12px;color:var(--text-sec);margin-top:20px;display:flex;align-items:center;gap:4px;justify-content:center}
+.home-status .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.home-status .dot.online{background:#34c759}
+.home-status .dot.offline{background:#ff3b30}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;background:var(--primary);color:#1c1c1e;border:none;border-radius:100px;padding:14px 48px;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(162,222,222,.35);transition:transform .15s}
+.btn-primary:active{background:var(--primary-dark);transform:scale(.97)}
+
+/* ===== Menu ===== */
+.menu-header{padding:20px 0 8px;display:flex;align-items:center;justify-content:space-between}
+.menu-header h2{font-size:18px;font-weight:700}
+.menu-header span{font-size:13px;color:var(--text-sec)}
+.cats{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+.cat-btn{flex-shrink:0;padding:6px 18px;border-radius:100px;border:1.5px solid var(--border);background:var(--card);font-size:14px;font-weight:500;cursor:pointer;color:var(--text-sec);transition:all .2s}
+.cat-btn.active{background:var(--primary);color:#1c1c1e;border-color:var(--primary);font-weight:600}
+.cat-btn:active{transform:scale(.95)}
+.items-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-bottom:100px}
+.item-card{background:var(--card);border-radius:var(--radius);padding:14px 12px 10px;border:2px solid transparent;cursor:pointer;box-shadow:var(--shadow);text-align:center;transition:all .2s}
+.item-card:active{transform:scale(.96)}
+.item-card.selected{border-color:var(--primary);background:var(--primary-dim, rgba(162,222,222,.08))}
+.item-card img{width:68px;height:auto;display:block;margin:0 auto 4px}
+.item-card .item-name{font-size:14px;font-weight:600}
+.item-card .item-desc{font-size:11px;color:var(--text-sec)}
+.item-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;margin-top:6px;transition:all .2s}
+.item-card.selected .item-check{border-color:var(--primary);background:var(--primary);color:#1c1c1e}
+
+/* ===== Menu bar ===== */
+.menu-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:440px;width:calc(100% - 40px);background:var(--card);border-radius:var(--radius) var(--radius) 0 0;box-shadow:0 -2px 16px rgba(0,0,0,.06);padding:12px 16px calc(12px + var(--safe-b));display:flex;align-items:center;justify-content:space-between;z-index:10}
+.menu-bar .count{font-size:14px;color:var(--text-sec)}
+.menu-bar .count strong{color:var(--text)}
+.menu-bar .btn-primary{padding:10px 28px;font-size:14px;box-shadow:none}
+
+/* ===== Confirm ===== */
+.confirm-header{padding:20px 0 8px}.confirm-header h2{font-size:18px;font-weight:700}
+.confirm-header .back{font-size:13px;color:var(--primary);cursor:pointer;margin-bottom:4px;display:inline-block}
+.selected-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.selected-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:var(--radius-sm);padding:10px 12px;box-shadow:var(--shadow)}
+.selected-item img{width:40px;height:auto;flex-shrink:0}
+.selected-item .si-name{font-size:14px;font-weight:600}
+.selected-item .si-cat{font-size:11px;color:var(--text-sec)}
+.selected-item .si-remove{background:none;border:none;color:var(--text-sec);font-size:18px;cursor:pointer;margin-left:auto;padding:0 0 0 8px}
+.form-group{margin-bottom:14px}
+.form-group label{font-size:13px;font-weight:600;margin-bottom:6px;display:block;color:var(--text)}
+.form-group textarea{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;resize:none;height:60px;font-family:inherit;background:var(--card);outline:none;transition:border .2s}
+.form-group textarea:focus{border-color:var(--primary)}
+.time-options{display:flex;gap:8px;flex-wrap:wrap}
+.time-opt{padding:8px 18px;border-radius:100px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;color:var(--text-sec);transition:all .2s}
+.time-opt.active{border-color:var(--primary);background:rgba(162,222,222,.1);color:var(--primary);font-weight:600}
+.confirm-submit{margin:18px 0 40px;text-align:center}
+.confirm-submit .btn-primary{padding:14px 48px;font-size:16px}
+
+/* ===== Result ===== */
+#page-result{align-items:center;justify-content:center;text-align:center}
+.result-dog{margin-bottom:8px}.result-dog img{width:100px;height:auto}
+.result-title{font-size:22px;font-weight:700;margin-bottom:4px}
+.result-sub{font-size:13px;color:var(--text-sec);margin-bottom:12px}
+.result-list{background:var(--card);border-radius:var(--radius);padding:14px 16px;margin:0 0 16px;width:100%;box-shadow:var(--shadow);text-align:left}
+.result-list .rl-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:14px}
+.result-list .rl-item+.rl-item{border-top:1px solid var(--border)}
+.result-list .rl-item img{width:28px;height:auto;flex-shrink:0}
+.result-msg{font-size:13px;color:var(--text-sec);font-style:italic;margin:4px 0 12px;padding:0 16px}
+.result-time{font-size:13px;color:var(--text-sec);margin-bottom:24px}
+.result-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn-secondary{display:inline-flex;align-items:center;gap:4px;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:100px;padding:12px 28px;font-size:14px;font-weight:600;cursor:pointer;transition:transform .15s}
+.btn-secondary:active{transform:scale(.97)}
+
+.fade-in{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Home -->
+  <div id="page-home" class="page active">
+    <div class="home-dog"><img src="outputs/img/sticker-01.png"></div>
+    <div class="home-title">情绪点单</div>
+    <div class="home-sub">Love in every form</div>
+    <div class="home-names"><span>小九</span> → <span>舟舟</span></div>
+    <button class="btn-primary" onclick="goTo('menu')">点单 ▶</button>
+    <div class="home-status">
+      <span class="dot offline" id="statusDot"></span>
+      <span id="statusText">连接中...</span>
+    </div>
+  </div>
+
+  <!-- Menu -->
+  <div id="page-menu" class="page">
+    <div class="menu-header"><h2>想要舟舟做点什么？</h2><span>Order for Zhouzhou</span></div>
+    <div class="cats" id="catTabs"></div>
+    <div class="items-grid" id="itemsGrid"></div>
+    <div class="menu-bar">
+      <span class="count" id="menuCount">已选 <strong>0</strong></span>
+      <button class="btn-primary" onclick="confirmOrder()">确认 Next</button>
+    </div>
+  </div>
+
+  <!-- Confirm -->
+  <div id="page-confirm" class="page">
+    <div class="confirm-header">
+      <div class="back" onclick="goTo('menu')">← 返回</div>
+      <h2>确认 Confirm</h2>
+    </div>
+    <div class="selected-list" id="selectedList"></div>
+    <div class="form-group">
+      <label>留句话</label>
+      <textarea id="msgInput" placeholder="Say something…" maxlength="200"></textarea>
+    </div>
+    <div class="form-group">
+      <label>什么时候？When?</label>
+      <div class="time-options" id="timeOptions">
+        <div class="time-opt" data-val="现在">现在</div>
+        <div class="time-opt" data-val="今晚">今晚</div>
+        <div class="time-opt" data-val="明早">明早</div>
+        <div class="time-opt" data-val="见面时">见面时</div>
+      </div>
+    </div>
+    <div class="confirm-submit"><button class="btn-primary" onclick="submitOrder()">下单 Place Order</button></div>
+  </div>
+
+  <!-- Result -->
+  <div id="page-result" class="page">
+    <div class="result-dog" id="resultDog"></div>
+    <div class="result-title">已下单</div>
+    <div class="result-sub">Ordered</div>
+    <div class="result-list" id="resultList"></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <div class="result-time" id="resultTime"></div>
+    <div class="result-actions">
+      <button class="btn-primary" onclick="goTo('menu')" style="padding:12px 32px;font-size:15px">再来 Again</button>
+      <button class="btn-secondary" onclick="goHome()">← 首页 Home</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== Menu Data =====
+const imgMap={watch:2,game:3,call:4,music:5,write:6,remind:7,voice:8,tuck:9,kiss:10,selfie:11,compliment:13,sweetTalk:14,gift:15,mailLetter:16,callMe:17,birthday:18,planTrip:19,planAhead:20,wishList:21,waiting:22};
+function ip(n){var s=n.toString();if(s.length<2)s="0"+s;return "outputs/img/sticker-"+s+".png"}
+const MENU={catNames:{zh:["陪伴","关心","萌萌","惊喜","计划"],en:["Be There","Care","Sweet","Surprise","Plan"]},items:[
+{cat:0,zh:"看电影",en:"Watch Together",desc:"同时打开，边看边聊",img:2},
+{cat:0,zh:"游戏",en:"Game Night",desc:"陪我玩",img:3},
+{cat:0,zh:"连麦",en:"Call",desc:"打电话",img:4},
+{cat:0,zh:"听歌",en:"Listen Together",desc:"共享歌单",img:5},
+{cat:1,zh:"写点东西",en:"Write to Me",desc:"打一段字发过来",img:6},
+{cat:1,zh:"催我睡觉",en:"Remind Me",desc:"你知道我总熬夜",img:7},
+{cat:1,zh:"发条语音",en:"Voice Note",desc:"想听你声音",img:8},
+{cat:1,zh:"哄睡",en:"Tuck Me In",desc:"到我睡着",img:9},
+{cat:2,zh:"亲亲",en:"Kiss Me",desc:"啵啵",img:10},
+{cat:2,zh:"报备",en:"Selfie",desc:"你在做什么呢",img:11},
+{cat:2,zh:"夸夸我",en:"Compliment Me",desc:"你觉得我怎么样",img:13},
+{cat:2,zh:"说点好听的",en:"Sweet Talk",desc:"让我脸红那种",img:14},
+{cat:2,zh:"我想你",en:"Miss You",desc:"你想我吗",img:23},
+{cat:3,zh:"寄礼物",en:"Send a Gift",desc:"拆你挑的快递",img:15},
+{cat:3,zh:"寄信",en:"Mail a Letter",desc:"收你写的字",img:16},
+{cat:3,zh:"打给我",en:"Call Me",desc:"想打就打",img:17},
+{cat:3,zh:"特殊的日子",en:"Remote Birthday",desc:"我们一起",img:18},
+{cat:4,zh:"计划见面",en:"Plan the Trip",desc:"倒数的日子",img:19},
+{cat:4,zh:"聊以后",en:"Plan Ahead",desc:"幻想以后生活",img:20},
+{cat:4,zh:"列清单",en:"Wish List",desc:"见面想做的事",img:21},
+{cat:4,zh:"等你",en:"Waiting",desc:"下次见",img:22}
+]};
+
+// ===== State =====
+const state={selected:[],activeCat:0,orderMsg:"",orderTime:"现在"};
+
+// ===== GitHub Issues =====
+var GH_REPO = "double1005/loveorder";
+var GH_TOKEN = localStorage.getItem("gh_token") || "";
+
+// If no token saved, prompt user
+if (!GH_TOKEN) {
+  GH_TOKEN = prompt("请输入 GitHub Personal Access Token（需 repo 权限）：\n没有的话去 https://github.com/settings/tokens 创建一个");
+  if (GH_TOKEN) {
+    localStorage.setItem("gh_token", GH_TOKEN);
+  }
+}
+
+// Update status display
+function updateStatus(connected, msg) {
+  document.getElementById("statusDot").className = "dot " + (connected ? "online" : "offline");
+  document.getElementById("statusText").textContent = msg || (connected ? "已连接 · GitHub" : "未连接");
+}
+
+if (GH_TOKEN) {
+  updateStatus(true, "已配置 · GitHub");
+} else {
+  updateStatus(false, "未配置 Token");
+}
+
+// Queue for offline orders
+var pendingOrders = JSON.parse(localStorage.getItem("pendingOrders") || "[]");
+
+// ===== Init =====// ===== Init =====
+function init(){renderCats();renderItems();renderTimeOpts()}
+function renderCats(){const el=document.getElementById("catTabs");el.innerHTML="";const cats=MENU.catNames;cats.zh.forEach((name,i)=>{const btn=document.createElement("div");btn.className="cat-btn"+(i===state.activeCat?" active":"");btn.textContent=name+" "+cats.en[i];btn.onclick=()=>{state.activeCat=i;renderCats();renderItems()};el.appendChild(btn)})}
+function renderItems(){const el=document.getElementById("itemsGrid");el.innerHTML="";MENU.items.filter(it=>it.cat===state.activeCat).forEach(item=>{const idx=MENU.items.indexOf(item);const sel=state.selected.includes(idx);const card=document.createElement("div");card.className="item-card"+(sel?" selected":"");card.innerHTML="<img src=\""+ip(item.img)+"\"><div class=\"item-name\">"+item.zh+"</div><div class=\"item-desc\">"+item.desc+"</div><div class=\"item-check\">"+(sel?"✓":"")+"</div>";card.onclick=()=>{const p=state.selected.indexOf(idx);if(p>-1)state.selected.splice(p,1);else state.selected.push(idx);renderItems();updateMenuBar()};el.appendChild(card)});updateMenuBar()}
+function updateMenuBar(){document.getElementById("menuCount").innerHTML="已选 <strong>"+state.selected.length+"</strong>"}
+function renderTimeOpts(){document.querySelectorAll(".time-opt").forEach(el=>{el.classList.toggle("active",el.dataset.val===state.orderTime);el.onclick=()=>{state.orderTime=el.dataset.val;renderTimeOpts()}})}
+function goTo(page){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById("page-"+page).classList.add("active");if(page==="menu"){renderCats();renderItems()}if(page==="confirm")renderSelected()}
+function goHome(){state.selected=[];state.orderMsg="";state.orderTime="现在";document.getElementById("msgInput").value="";goTo("home")}
+function confirmOrder(){if(state.selected.length===0)return;goTo("confirm")}
+function renderSelected(){const el=document.getElementById("selectedList");el.innerHTML="";state.selected.forEach(idx=>{const item=MENU.items[idx];const div=document.createElement("div");div.className="selected-item";div.innerHTML="<img src=\""+ip(item.img)+"\"><div><div class=\"si-name\">"+item.zh+"</div><div class=\"si-cat\">"+MENU.catNames.en[item.cat]+"</div></div><button class=\"si-remove\" onclick=\"removeSel("+idx+")\">×</button>";el.appendChild(div)})}
+function removeSel(idx){const p=state.selected.indexOf(idx);if(p>-1)state.selected.splice(p,1);if(state.selected.length===0)goTo("menu");else renderSelected()}
+
+// ===== Submit Order =====
+function submitOrder() {
+  state.orderMsg = document.getElementById("msgInput").value.trim();
+  var items = state.selected.map(function(idx) { return MENU.items[idx]; });
+
+  // Show result page
+  var el = document.getElementById("resultList");
+  el.innerHTML = "";
+  items.forEach(function(item) {
+    var div = document.createElement("div");
+    div.className = "rl-item";
+    div.innerHTML = "<img src=\""+ip(item.img)+"\"><span>"+item.zh+" — "+item.desc+"</span>";
+    el.appendChild(div);
+  });
+  document.getElementById("resultMsg").textContent = state.orderMsg ? "\""+state.orderMsg+"\"" : "";
+  document.getElementById("resultTime").textContent = "🕐 "+state.orderTime;
+  var dog = state.selected.length>0 ? items[items.length-1] : MENU.items[0];
+  document.getElementById("resultDog").innerHTML = "<img src=\""+ip(dog.img)+"\">";
+  goTo("result");
+
+  // Build order object
+  var order = {
+    items: items,
+    msg: state.orderMsg,
+    time: state.orderTime,
+    date: new Date().toISOString()
+  };
+
+  // 1. Save locally as fallback
+  var local = JSON.parse(localStorage.getItem("loveOrders") || "[]");
+  local.push(order);
+  localStorage.setItem("loveOrders", JSON.stringify(local));
+
+    // 2. Send via GitHub Issues API
   if (GH_TOKEN) {
-    localStorage.setItem("gh_token", GH_TOKEN);
-  }
-}
-
-// Update status display
-function updateStatus(connected, msg) {
-  document.getElementById("statusDot").className = "dot " + (connected ? "online" : "offline");
-  document.getElementById("statusText").textContent = msg || (connected ? "已连接 · GitHub" : "未连接");
-}
-
-if (GH_TOKEN) {
-  updateStatus(true, "已配置 · GitHub");
-} else {
-  updateStatus(false, "未配置 Token");
-}
-
-// Queue for offline orders
-var pendingOrders = JSON.parse(localStorage.getItem("pendingOrders") || "[]");
-
-// ===== Init =====// ===== Init =====
-function init(){renderCats();renderItems();renderTimeOpts()}
-function renderCats(){const el=document.getElementById("catTabs");el.innerHTML="";const cats=MENU.catNames;cats.zh.forEach((name,i)=>{const btn=document.createElement("div");btn.className="cat-btn"+(i===state.activeCat?" active":"");btn.textContent=name+" "+cats.en[i];btn.onclick=()=>{state.activeCat=i;renderCats();renderItems()};el.appendChild(btn)})}
-function renderItems(){const el=document.getElementById("itemsGrid");el.innerHTML="";MENU.items.filter(it=>it.cat===state.activeCat).forEach(item=>{const idx=MENU.items.indexOf(item);const sel=state.selected.includes(idx);const card=document.createElement("div");card.className="item-card"+(sel?" selected":"");card.innerHTML="<img src=\""+ip(item.img)+"\"><div class=\"item-name\">"+item.zh+"</div><div class=\"item-desc\">"+item.desc+"</div><div class=\"item-check\">"+(sel?"✓":"")+"</div>";card.onclick=()=>{const p=state.selected.indexOf(idx);if(p>-1)state.selected.splice(p,1);else state.selected.push(idx);renderItems();updateMenuBar()};el.appendChild(card)});updateMenuBar()}
-function updateMenuBar(){document.getElementById("menuCount").innerHTML="已选 <strong>"+state.selected.length+"</strong>"}
-function renderTimeOpts(){document.querySelectorAll(".time-opt").forEach(el=>{el.classList.toggle("active",el.dataset.val===state.orderTime);el.onclick=()=>{state.orderTime=el.dataset.val;renderTimeOpts()}})}
-function goTo(page){document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));document.getElementById("page-"+page).classList.add("active");if(page==="menu"){renderCats();renderItems()}if(page==="confirm")renderSelected()}
-function goHome(){state.selected=[];state.orderMsg="";state.orderTime="现在";document.getElementById("msgInput").value="";goTo("home")}
-function confirmOrder(){if(state.selected.length===0)return;goTo("confirm")}
-function renderSelected(){const el=document.getElementById("selectedList");el.innerHTML="";state.selected.forEach(idx=>{const item=MENU.items[idx];const div=document.createElement("div");div.className="selected-item";div.innerHTML="<img src=\""+ip(item.img)+"\"><div><div class=\"si-name\">"+item.zh+"</div><div class=\"si-cat\">"+MENU.catNames.en[item.cat]+"</div></div><button class=\"si-remove\" onclick=\"removeSel("+idx+")\">×</button>";el.appendChild(div)})}
-function removeSel(idx){const p=state.selected.indexOf(idx);if(p>-1)state.selected.splice(p,1);if(state.selected.length===0)goTo("menu");else renderSelected()}
-
-// ===== Submit Order =====
-function submitOrder() {
-  state.orderMsg = document.getElementById("msgInput").value.trim();
-  var items = state.selected.map(function(idx) { return MENU.items[idx]; });
-
-  // Show result page
-  var el = document.getElementById("resultList");
-  el.innerHTML = "";
-  items.forEach(function(item) {
-    var div = document.createElement("div");
-    div.className = "rl-item";
-    div.innerHTML = "<img src=\""+ip(item.img)+"\"><span>"+item.zh+" — "+item.desc+"</span>";
-    el.appendChild(div);
-  });
-  document.getElementById("resultMsg").textContent = state.orderMsg ? "\""+state.orderMsg+"\"" : "";
-  document.getElementById("resultTime").textContent = "🕐 "+state.orderTime;
-  var dog = state.selected.length>0 ? items[items.length-1] : MENU.items[0];
-  document.getElementById("resultDog").innerHTML = "<img src=\""+ip(dog.img)+"\">";
-  goTo("result");
-
-  // Build order object
-  var order = {
-    items: items,
-    msg: state.orderMsg,
-    time: state.orderTime,
-    date: new Date().toISOString()
-  };
-
-  // 1. Save locally as fallback
-  var local = JSON.parse(localStorage.getItem("loveOrders") || "[]");
-  local.push(order);
-  localStorage.setItem("loveOrders", JSON.stringify(local));
-
-  // 2. Send via GitHub Issues API
-  if (GH_TOKEN) {
-    var body = "";
+    var body = '';
     items.forEach(function(it) {
-      body += "- " + it.zh + " (" + it.desc + ")\n";
+      body += '- ' + it.zh + ' (' + it.desc + ')\n';
     });
-    if (state.orderMsg) { body += "\n留言：" + state.orderMsg; }
-    body += "\n时间：" + state.orderTime;
-    body += "\n日期：" + new Date().toLocaleString("zh-CN");
-    
-      }
-}
+    if (state.orderMsg) { body += '\n留言：' + state.orderMsg; }
+    body += '\n时间：' + state.orderTime;
+    body += '\n日期：' + new Date().toLocaleString('zh-CN');
 
-init();
-</script>
-</body>
+    fetch('https://api.github.com/repos/' + GH_REPO + '/issues', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'token ' + GH_TOKEN,
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify({
+        title: '\u2764\ufe0f \u5c0f\u4e5d\u7684\u5fc3\u610f',
+        body: body,
+        labels: ['order']
+      })
+    }).then(function(r) {
+      if (r.ok) {
+        console.log('[gh] order created');
+        document.getElementById('statusDot').className = 'dot online';
+        document.getElementById('statusText').textContent = '\u5df2\u540c\u6b65 \u00b7 GitHub';
+      } else {
+        console.log('[gh] create failed:', r.status);
+        pendingOrders.push(order);
+        localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+        document.getElementById('statusText').textContent = '\u540c\u6b65\u5931\u8d25 \u00b7 \u5df2\u7f13\u5b58';
+      }
+    }).catch(function(e) {
+      console.log('[gh] error:', e);
+      pendingOrders.push(order);
+      localStorage.setItem('pendingOrders', JSON.stringify(pendingOrders));
+      document.getElementById('statusText').textContent = '\u79bb\u7ebf \u00b7 \u5df2\u7f13\u5b58\u5230\u672c\u5730';
+    });
+  }
+
+
+init();
+</script>
+</body>
 </html>
