@@ -144,20 +144,24 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Ro
 var GH_REPO = "double1005/loveorder";
 var GH_TOKEN = localStorage.getItem("gh_token") || "";
 
-// If no token saved, prompt user
-if (!GH_TOKEN) {
-  GH_TOKEN = prompt("请输入 GitHub Personal Access Token（需 repo 权限）：\n没有的话去 https://github.com/settings/tokens 创建一个");
-  if (GH_TOKEN) {
+// Update connection indicator
+var connEl = document.getElementById("connStatus");
+
+// Token configuration - click status to change
+function promptToken() {
+  var input = window.prompt("\u8bf7\u8f93\u5165 GitHub Personal Access Token\uff08\u9700 repo \u6743\u9650\uff09\uff1a\n\u6ca1\u6709\u7684\u8bdd\u53bb https://github.com/settings/tokens \u521b\u5efa\u4e00\u4e2a", GH_TOKEN || "");
+  if (input !== null && input !== "") {
+    GH_TOKEN = input;
     localStorage.setItem("gh_token", GH_TOKEN);
   }
 }
-
-// Update connection indicator
-var connEl = document.getElementById("connStatus");
 function setConn(ok) {
   connEl.className = "conn-status " + (ok ? "connected" : "disconnected");
 }
 if (GH_TOKEN) { setConn(true); } else { setConn(false); }
+// Make status clickable to set/change token
+connEl.onclick = function() { promptToken(); };
+connEl.title = GH_TOKEN ? '已配置' : '点击设置 Token';
 
 // ===== State =====
 var allOrders = [];
