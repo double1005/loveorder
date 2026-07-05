@@ -1,0 +1,14 @@
+{
+  "name": "loveorder",
+  "version": "1.0.0",
+  "description": "情绪点单 · Love Order — 实时跨设备点单系统",
+  "main": "server.js",
+  "scripts": {
+    "start": "npx serve public -l 3000",
+    "dev": "node server.js",
+    "deploy": "git push origin main && git push origin gh-pages 2>/dev/null || true"
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}
