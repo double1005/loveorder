@@ -107,8 +107,12 @@ function loadOrders() {
       headers: {"Authorization": "token "+GH_TOKEN}
     }).then(function(r){return r.json()}).then(function(issues){
       if (issues && issues.length > 0) {
+        var stored = JSON.parse(localStorage.getItem("loveOrders")||"[]");
+        var readSet = {};
+        stored.forEach(function(s){ if(s._ghId) readSet[s._ghId] = true; });
         var list = [];
         issues.forEach(function(issue){
+          if (readSet[issue.number]) return;
           try {
             var data = JSON.parse(issue.body);
             if (data && data.items) {
@@ -120,34 +124,31 @@ function loadOrders() {
             list.push({fromGH:true, number:issue.number, body:issue.body, time:issue.created_at, date:issue.created_at, items:[{zh:issue.title, desc:issue.body}]});
           }
         });
-        renderOrders(list);
-        var st=document.getElementById("syncStatus");if(st){st.textContent="✅";st.title="已连接"};
-        hasData = true;
-        var stored = JSON.parse(localStorage.getItem("loveOrders")||"[]");
-        list.forEach(function(order){
-          if (!stored.some(function(s){return s._ghId===order.number})) {
+        if (list.length > 0) {
+          hasData = true;
+          window._loveRendered = true;
+          list.forEach(function(order){
             order._ghId = order.number;
             stored.push(order);
-          }
-        });
-        localStorage.setItem("loveOrders", JSON.stringify(stored));
-        issues.forEach(function(issue){
-          fetch("https://api.github.com/repos/"+GH_REPO+"/issues/"+issue.number, {
-            method:"PATCH",
-            headers:{"Authorization":"token "+GH_TOKEN,"Content-Type":"application/json"},
-            body:JSON.stringify({state:"closed"})
           });
-        });
+          localStorage.setItem("loveOrders", JSON.stringify(stored));
+          renderOrders(stored);
+          var st=document.getElementById("syncStatus");if(st){st.textContent="✅ 新订单!";st.title="已连接"};setTimeout(function(){var st=document.getElementById("syncStatus");if(st){st.textContent="✅"}},3000);
+        } else {
+          var st=document.getElementById("syncStatus");if(st){st.textContent="✅";st.title="已连接"};
+        }
       }
       var loc = JSON.parse(localStorage.getItem("loveOrders")||"[]");
-      /* old filter: var localOnly = loc.filter(function(o){ return !o._ghId; }); */ var localOnly = loc;
-      if (localOnly.length > 0 && !hasData) { renderOrders(localOnly); hasData = true; }
-      if (!hasData) { document.getElementById("empty").style.display = "block"; }
+      // Render localStorage orders only on first load (avoid poll flickering)
+      if (!window._loveRendered) {
+        if (loc.length > 0) { renderOrders(loc); window._loveRendered = true; hasData = true; }
+      }
+      if (!hasData && !window._loveRendered) { document.getElementById("empty").style.display = "block"; }
     }).catch(function(){
       var st=document.getElementById("syncStatus");if(st){st.textContent="⚠️";st.title="同步失败"};
       var orders = JSON.parse(localStorage.getItem("loveOrders") || "[]");
       if (orders.length > 0) { renderOrders(orders); hasData = true; }
-      if (!hasData) { document.getElementById("empty").style.display = "block"; }
+      if (!hasData && !window._loveRendered) { document.getElementById("empty").style.display = "block"; }
     });
   } else {
     var orders = JSON.parse(localStorage.getItem("loveOrders") || "[]");
