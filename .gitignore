@@ -6,3 +6,5 @@ rewrite2.py
 deploy_temp/
 .DS_Store
 Thumbs.db
+
+server.js
